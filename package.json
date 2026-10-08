@@ -1,0 +1,27 @@
+{
+  "name": "mongodb-database-collections-records-lab",
+  "version": "1.0.0",
+  "description": "MongoDB Lab Experiment: Database & Collection Management and Record Operations with Indexes and Aggregation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "lab": "mongosh \"mongodb://127.0.0.1:27017\" commands.mongosh",
+    "node-lab": "node record_operations.js"
+  },
+  "keywords": [
+    "mongodb",
+    "mongosh",
+    "aggregation",
+    "indexes",
+    "crud",
+    "lab"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongodb": "^6.14.2"
+  }
+}

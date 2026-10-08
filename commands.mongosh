@@ -1,0 +1,176 @@
+// ==============================================================================
+// Experiment: MongoDB Database, Collection, and Record Operations
+// Part (a): Create and Drop Databases & Collections
+// Part (b): Records Operations with find(), limit(), sort(), createIndex(), and aggregate()
+// Target Database: library
+// Target Collection: books
+// ==============================================================================
+
+print("\n==============================================================================");
+print(" EXPERIMENT: MONGODB DATABASE, COLLECTION & RECORD OPERATIONS");
+print("==============================================================================\n");
+
+// ------------------------------------------------------------------------------
+// PART (a) – DATABASES AND COLLECTIONS
+// ------------------------------------------------------------------------------
+print(">>> PART (a): DATABASES AND COLLECTIONS <<<\n");
+
+// Step-1: List all existing databases
+print("--- Step 1: List all databases ---");
+print("Command: show dbs");
+printjson(db.adminCommand({ listDatabases: 1 }).databases.map(d => ({ name: d.name, sizeOnDisk: d.sizeOnDisk })));
+
+// Step-2: Create (switch to) a new database: library
+print("\n--- Step 2: Switch / Create database 'library' ---");
+print("Command: use library");
+db = db.getSiblingDB("library");
+print("Active Database: " + db.getName());
+
+// Step-3: Create collection explicitly
+print("\n--- Step 3: Create collection 'books' explicitly ---");
+print("Command: db.createCollection('books')");
+// In case it already exists from prior run, drop it cleanly first
+db.books.drop();
+const createColRes = db.createCollection("books");
+printjson(createColRes);
+
+// Step-4: Insert documents (inserts 5 sample book documents)
+print("\n--- Step 4: Insert sample documents into 'books' ---");
+print("Command: db.books.insertMany([...])");
+const initialInsertRes = db.books.insertMany([
+    { title: "1984", author: "George Orwell", year: 1949, genre: "Dystopian", price: 12.99 },
+    { title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960, genre: "Fiction", price: 14.99 },
+    { title: "The Great Gatsby", author: "F. Scott Fitzgerald", year: 1925, genre: "Classic", price: 10.99 },
+    { title: "Moby Dick", author: "Herman Melville", year: 1851, genre: "Adventure", price: 9.99 },
+    { title: "Brave New World", author: "Aldous Huxley", year: 1932, genre: "Dystopian", price: 11.99 }
+]);
+printjson(initialInsertRes);
+
+// Step-5: List collections in current database
+print("\n--- Step 5: List collections in current database ---");
+print("Command: show collections");
+printjson(db.getCollectionNames());
+
+// Step-6: Drop the collection
+print("\n--- Step 6: Drop collection 'books' ---");
+print("Command: db.books.drop()");
+const dropColRes = db.books.drop();
+print("db.books.drop() acknowledged: " + dropColRes);
+print("Collections remaining: ");
+printjson(db.getCollectionNames());
+
+// Step-7: Drop the database
+print("\n--- Step 7: Drop database 'library' ---");
+print("Command: db.dropDatabase()");
+const dropDbRes = db.dropDatabase();
+printjson(dropDbRes);
+
+// ------------------------------------------------------------------------------
+// PART (b) – RECORDS OPERATIONS
+// ------------------------------------------------------------------------------
+print("\n==============================================================================");
+print(">>> PART (b): RECORDS OPERATIONS (find, limit, sort, index, aggregate) <<<");
+print("==============================================================================\n");
+
+// Step-1: Re-create the database and insert sample data
+print("--- Step 1: Re-create database 'library' and insert sample data ---");
+db = db.getSiblingDB("library");
+const insertPartB = db.books.insertMany([
+    { title: "1984", author: "George Orwell", year: 1949, genre: "Dystopian", price: 12.99 },
+    { title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960, genre: "Fiction", price: 14.99 },
+    { title: "The Great Gatsby", author: "F. Scott Fitzgerald", year: 1925, genre: "Classic", price: 10.99 },
+    { title: "Moby Dick", author: "Herman Melville", year: 1851, genre: "Adventure", price: 9.99 },
+    { title: "Brave New World", author: "Aldous Huxley", year: 1932, genre: "Dystopian", price: 11.99 }
+]);
+print("Inserted " + Object.keys(insertPartB.insertedIds).length + " sample books successfully.");
+
+// Step-2: Find all books, sorted by year (ascending: 1)
+print("\n--- Step 2: Find all books, sorted by year (ascending) ---");
+print("Command: db.books.find().sort({ year: 1 })");
+const sortedBooks = db.books.find().sort({ year: 1 }).toArray();
+printjson(sortedBooks);
+
+// Step-3: Find the first 3 books using limit(3)
+print("\n--- Step 3: Find first 3 books using limit(3) ---");
+print("Command: db.books.find().limit(3)");
+const limitedBooks = db.books.find().limit(3).toArray();
+printjson(limitedBooks);
+
+// Step-4: Find books of a specific genre ("Dystopian")
+print("\n--- Step 4: Find books of specific genre ('Dystopian') ---");
+print("Command: db.books.find({ genre: 'Dystopian' })");
+const dystopianBooks = db.books.find({ genre: "Dystopian" }).toArray();
+printjson(dystopianBooks);
+
+// Step-5: Create an index on the author field and check indexes
+print("\n--- Step 5: Create index on 'author' field & inspect indexes ---");
+print("Command: db.books.createIndex({ author: 1 })");
+const indexRes = db.books.createIndex({ author: 1 });
+print("Index Created: " + indexRes);
+print("\nCommand: db.books.getIndexes()");
+printjson(db.books.getIndexes());
+
+// Step-6: Aggregation – Group books by genre and count them
+print("\n--- Step 6: Aggregation - Group books by genre and count ---");
+print("Command: db.books.aggregate([ { $group: { _id: '$genre', count: { $sum: 1 } } }, { $sort: { count: -1 } } ])");
+const countByGenre = db.books.aggregate([
+    { $group: { _id: "$genre", count: { $sum: 1 } } },
+    { $sort: { count: -1 } }
+]).toArray();
+printjson(countByGenre);
+
+// Step-7: Aggregation – Find average price of books in each genre
+print("\n--- Step 7: Aggregation - Average price of books in each genre ---");
+print("Command: db.books.aggregate([ { $group: { _id: '$genre', avgPrice: { $avg: '$price' } } }, { $sort: { avgPrice: -1 } } ])");
+const avgPriceByGenre = db.books.aggregate([
+    { $group: { _id: "$genre", avgPrice: { $avg: "$price" } } },
+    { $sort: { avgPrice: -1 } }
+]).toArray();
+printjson(avgPriceByGenre);
+
+// Step-8: Combined aggregation – Filter (year > 1900), group, sort, project
+print("\n--- Step 8: Combined Aggregation - Filter, Group, Sort, Project ---");
+print("Command: db.books.aggregate([");
+print("  { $match: { year: { $gt: 1900 } } },");
+print("  { $group: { _id: '$genre', count: { $sum: 1 }, avgPrice: { $avg: '$price' } } },");
+print("  { $sort: { count: -1 } },");
+print("  { $project: { genre: '$_id', count: 1, avgPrice: 1, _id: 0 } }");
+print("])");
+const combinedAgg = db.books.aggregate([
+    { $match: { year: { $gt: 1900 } } },
+    { $group: { _id: "$genre", count: { $sum: 1 }, avgPrice: { $avg: "$price" } } },
+    { $sort: { count: -1 } },
+    { $project: { genre: "$_id", count: 1, avgPrice: 1, _id: 0 } }
+]).toArray();
+printjson(combinedAgg);
+
+// ------------------------------------------------------------------------------
+// ADDITIONAL EXAMPLES FROM PROBLEM STATEMENT
+// ------------------------------------------------------------------------------
+print("\n==============================================================================");
+print(">>> ADDITIONAL EXAMPLES <<<");
+print("==============================================================================\n");
+
+// Example 1: Complete Aggregation Pipeline (Decade Calculation)
+print("--- Example 1: Aggregation by Genre and Decade ---");
+print("Command: db.books.aggregate([");
+print("  { $match: { year: { $gte: 1900 } } },");
+print("  { $group: { _id: { genre: '$genre', decade: { $subtract: [ '$year', { $mod: [ '$year', 10 ] } ] } }, total: { $sum: 1 } } },");
+print("  { $sort: { '_id.decade': 1 } }");
+print("])");
+const decadeAgg = db.books.aggregate([
+    { $match: { year: { $gte: 1900 } } },
+    { $group: { _id: { genre: "$genre", decade: { $subtract: [ "$year", { $mod: [ "$year", 10 ] } ] } }, total: { $sum: 1 } } },
+    { $sort: { "_id.decade": 1 } }
+]).toArray();
+printjson(decadeAgg);
+
+// Example 2: Find with Sorting and Limiting
+print("\n--- Example 2: Find with Sorting (year descending) and Limiting (2) ---");
+print("Command: db.books.find({ genre: 'Dystopian' }).sort({ year: -1 }).limit(2)");
+const example2Find = db.books.find({ genre: "Dystopian" }).sort({ year: -1 }).limit(2).toArray();
+printjson(example2Find);
+
+print("\n==============================================================================");
+print(" EXPERIMENT EXECUTED SUCCESSFULLY!");
+print("==============================================================================\n");

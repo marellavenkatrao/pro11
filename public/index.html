@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MongoDB Laboratory Experiment Suite: Create & Drop Databases and Collections, Record Operations with find, limit, sort, createIndex, and aggregate.">
+  <title>MongoDB Lab Experiment: Database, Collections & Aggregation</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#10B981" stroke="none"/>
+            <path d="M12 3v18M3 12h18" stroke="#059669" stroke-width="1.5" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>MongoDB Lab Experiment Suite</h1>
+          <p class="subtitle">Database & Collection Management • Record Operations • Indexes • Aggregation Pipeline</p>
+        </div>
+      </div>
+
+      <div class="header-status" id="headerStatus">
+        <div class="status-pill status-online">
+          <span class="status-dot pulse"></span>
+          <span id="mongoStatusText">Connecting...</span>
+        </div>
+        <div class="status-badge" id="dbStatsBadge">
+          <span class="badge-label">DB:</span> <strong id="currentDbName">library</strong>
+          <span class="badge-separator">|</span>
+          <span class="badge-label">Docs:</span> <strong id="docCountVal">5</strong>
+          <span class="badge-separator">|</span>
+          <span class="badge-label">Indexes:</span> <strong id="indexCountVal">2</strong>
+        </div>
+        <div class="header-actions">
+          <button id="btnQuickReset" class="btn btn-secondary btn-sm" title="Reset library collection with sample books">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset DB
+          </button>
+          <button id="btnRunFullLab" class="btn btn-primary btn-sm" title="Run all queries sequentially">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run All Queries
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav" aria-label="Experiment navigation">
+      <button class="tab-btn active" data-tab="tab-guided">
+        <span class="tab-num">1</span>
+        <span>Guided Lab Workflow</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-aggregation">
+        <span class="tab-num">2</span>
+        <span>Aggregation Pipeline Studio</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-explorer">
+        <span class="tab-num">3</span>
+        <span>Database Explorer & Indexes</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-terminal">
+        <span class="tab-num">4</span>
+        <span>Interactive mongosh Terminal</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-report">
+        <span class="tab-num">5</span>
+        <span>Lab Report & Viva Voce</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-content">
+
+    <!-- ============================================================ -->
+    <!-- TAB 1: GUIDED LAB WORKFLOW (PART A & PART B) -->
+    <!-- ============================================================ -->
+    <section id="tab-guided" class="tab-panel active">
+      <div class="lab-intro-banner">
+        <div class="banner-badge">AIM OF EXPERIMENT</div>
+        <h2>(a) Create & Drop Databases and Collections | (b) Records Operations: find(), limit(), sort(), createIndex(), and aggregate()</h2>
+        <p>Follow the step-by-step procedure below. You can run individual steps or trigger the full sequence while watching the database state and terminal output update in real time.</p>
+      </div>
+
+      <div class="workflow-grid">
+        <!-- Left: Workflow Steps -->
+        <div class="workflow-steps-column">
+          
+          <!-- PART A SECTION -->
+          <div class="section-divider">
+            <div class="divider-icon">A</div>
+            <div class="divider-text">
+              <h3>Part (a) – Databases and Collections</h3>
+              <p>Database creation, explicit collection creation, document insertion, viewing, and clean removal</p>
+            </div>
+            <button id="btnRunPartA" class="btn btn-outline btn-xs">Run Part (a) All</button>
+          </div>
+
+          <!-- Step A1 -->
+          <div class="step-card" data-step="a1">
+            <div class="step-card-header">
+              <span class="step-tag">Step A1</span>
+              <h4>List All Databases</h4>
+              <button class="btn btn-sm btn-action btn-run-step" data-step="step1" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>show dbs</code>
+              <button class="copy-btn" title="Copy query" data-copy="show dbs">📋</button>
+            </div>
+            <div class="step-desc">Lists all databases stored on disk with storage consumption.</div>
+          </div>
+
+          <!-- Step A2 -->
+          <div class="step-card" data-step="a2">
+            <div class="step-card-header">
+              <span class="step-tag">Step A2</span>
+              <h4>Switch / Create Database</h4>
+              <button class="btn btn-sm btn-action btn-run-step" data-step="step2" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>use library</code>
+              <button class="copy-btn" title="Copy query" data-copy="use library">📋</button>
+            </div>
+            <div class="step-desc">Switches active context to <code>library</code>. Exists in memory until first document is stored.</div>
+          </div>
+
+          <!-- Step A3 -->
+          <div class="step-card" data-step="a3">
+            <div class="step-card-header">
+              <span class="step-tag">Step A3</span>
+              <h4>Create Collection Explicitly</h4>
+              <button class="btn btn-sm btn-action btn-run-step" data-step="step3" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.createCollection("books")</code>
+              <button class="copy-btn" title="Copy query" data-copy='db.createCollection("books")'>📋</button>
+            </div>
+            <div class="step-desc">Explicitly initializes the <code>books</code> collection schema in the active database.</div>
+          </div>
+
+          <!-- Step A4 -->
+          <div class="step-card" data-step="a4">
+            <div class="step-card-header">
+              <span class="step-tag">Step A4</span>
+              <h4>Insert Sample Documents</h4>
+              <button class="btn btn-sm btn-action btn-run-step" data-step="step4" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.insertMany([ { title: "1984", ... }, ... ])</code>
+              <button class="copy-btn" title="Copy query" data-copy='db.books.insertMany([ { title: "1984", author: "George Orwell", year: 1949, genre: "Dystopian", price: 12.99 }, { title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960, genre: "Fiction", price: 14.99 }, { title: "The Great Gatsby", author: "F. Scott Fitzgerald", year: 1925, genre: "Classic", price: 10.99 }, { title: "Moby Dick", author: "Herman Melville", year: 1851, genre: "Adventure", price: 9.99 }, { title: "Brave New World", author: "Aldous Huxley", year: 1932, genre: "Dystopian", price: 11.99 } ])'>📋</button>
+            </div>
+            <div class="step-desc">Inserts 5 book records with title, author, year, genre, and price fields.</div>
+          </div>
+
+          <!-- Step A5 -->
+          <div class="step-card" data-step="a5">
+            <div class="step-card-header">
+              <span class="step-tag">Step A5</span>
+              <h4>List Collections in Database</h4>
+              <button class="btn btn-sm btn-action btn-run-step" data-step="step5" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>show collections</code>
+              <button class="copy-btn" title="Copy query" data-copy="show collections">📋</button>
+            </div>
+            <div class="step-desc">Displays all collections present in the active <code>library</code> database.</div>
+          </div>
+
+          <!-- Step A6 -->
+          <div class="step-card" data-step="a6">
+            <div class="step-card-header">
+              <span class="step-tag">Step A6</span>
+              <h4>Drop Collection</h4>
+              <button class="btn btn-sm btn-danger btn-run-step" data-step="step6" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.drop()</code>
+              <button class="copy-btn" title="Copy query" data-copy="db.books.drop()">📋</button>
+            </div>
+            <div class="step-desc">Drops the collection and removes its documents and user indexes.</div>
+          </div>
+
+          <!-- Step A7 -->
+          <div class="step-card" data-step="a7">
+            <div class="step-card-header">
+              <span class="step-tag">Step A7</span>
+              <h4>Drop Database</h4>
+              <button class="btn btn-sm btn-danger btn-run-step" data-step="step7" data-part="a">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.dropDatabase()</code>
+              <button class="copy-btn" title="Copy query" data-copy="db.dropDatabase()">📋</button>
+            </div>
+            <div class="step-desc">Deletes the active <code>library</code> database and all allocated storage.</div>
+          </div>
+
+          <!-- PART B SECTION -->
+          <div class="section-divider mt-6">
+            <div class="divider-icon">B</div>
+            <div class="divider-text">
+              <h3>Part (b) – Records Operations & Aggregations</h3>
+              <p>find(), limit(), sort(), createIndex(), and multi-stage aggregate() queries</p>
+            </div>
+            <button id="btnRunPartB" class="btn btn-outline btn-xs">Run Part (b) All</button>
+          </div>
+
+          <!-- Step B1 -->
+          <div class="step-card" data-step="b1">
+            <div class="step-card-header">
+              <span class="step-tag">Step B1</span>
+              <h4>Re-create & Seed Sample Data</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="seed">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.insertMany([ 5 sample books ])</code>
+            </div>
+            <div class="step-desc">Seeds the 5 canonical documents for subsequent record queries.</div>
+          </div>
+
+          <!-- Step B2 -->
+          <div class="step-card" data-step="b2">
+            <div class="step-card-header">
+              <span class="step-tag">Step B2</span>
+              <h4>Find All Books, Sorted by Year (Ascending)</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="sort-year">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.find().sort({ year: 1 })</code>
+              <button class="copy-btn" title="Copy query" data-copy="db.books.find().sort({ year: 1 })">📋</button>
+            </div>
+            <div class="step-desc">Sorts by <code>year: 1</code> (ascending). Oldest book (Moby Dick 1851) appears first.</div>
+          </div>
+
+          <!-- Step B3 -->
+          <div class="step-card" data-step="b3">
+            <div class="step-card-header">
+              <span class="step-tag">Step B3</span>
+              <h4>Find First 3 Books using limit()</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="limit-3">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.find().limit(3)</code>
+              <button class="copy-btn" title="Copy query" data-copy="db.books.find().limit(3)">📋</button>
+            </div>
+            <div class="step-desc">Limits the cursor output to the first 3 matching documents.</div>
+          </div>
+
+          <!-- Step B4 -->
+          <div class="step-card" data-step="b4">
+            <div class="step-card-header">
+              <span class="step-tag">Step B4</span>
+              <h4>Find Books by Genre</h4>
+              <div class="genre-selector-wrap">
+                <select id="genreSelectFilter" class="select-sm">
+                  <option value="Dystopian" selected>Dystopian</option>
+                  <option value="Fiction">Fiction</option>
+                  <option value="Classic">Classic</option>
+                  <option value="Adventure">Adventure</option>
+                </select>
+                <button class="btn btn-sm btn-action btn-run-query" data-query="genre-filter">Run Step</button>
+              </div>
+            </div>
+            <div class="query-block">
+              <code id="genreQueryDisplay">db.books.find({ genre: "Dystopian" })</code>
+              <button class="copy-btn" title="Copy query" data-copy='db.books.find({ genre: "Dystopian" })'>📋</button>
+            </div>
+            <div class="step-desc">Performs field equality matching on the <code>genre</code> key.</div>
+          </div>
+
+          <!-- Step B5 -->
+          <div class="step-card" data-step="b5">
+            <div class="step-card-header">
+              <span class="step-tag">Step B5</span>
+              <h4>Create Index on Author Field & Inspect</h4>
+              <div class="btn-group-sm">
+                <button class="btn btn-sm btn-action btn-run-query" data-query="create-index">createIndex()</button>
+                <button class="btn btn-sm btn-secondary btn-run-query" data-query="get-indexes">getIndexes()</button>
+              </div>
+            </div>
+            <div class="query-block">
+              <code>db.books.createIndex({ author: 1 })<br>db.books.getIndexes()</code>
+              <button class="copy-btn" title="Copy query" data-copy="db.books.createIndex({ author: 1 })">📋</button>
+            </div>
+            <div class="step-desc">Creates an ascending B-Tree index on <code>author</code> for O(log N) lookup time.</div>
+          </div>
+
+          <!-- Step B6 -->
+          <div class="step-card" data-step="b6">
+            <div class="step-card-header">
+              <span class="step-tag">Step B6</span>
+              <h4>Aggregation: Group by Genre & Count</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="agg-count-genre">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.aggregate([<br>&nbsp;&nbsp;{ $group: { _id: "$genre", count: { $sum: 1 } } },<br>&nbsp;&nbsp;{ $sort: { count: -1 } }<br>])</code>
+              <button class="copy-btn" title="Copy query" data-copy='db.books.aggregate([ { $group: { _id: "$genre", count: { $sum: 1 } } }, { $sort: { count: -1 } } ])'>📋</button>
+            </div>
+            <div class="step-desc">Groups by <code>genre</code> and accumulates document counts using <code>$sum: 1</code>.</div>
+          </div>
+
+          <!-- Step B7 -->
+          <div class="step-card" data-step="b7">
+            <div class="step-card-header">
+              <span class="step-tag">Step B7</span>
+              <h4>Aggregation: Average Price Per Genre</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="agg-avg-price">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.aggregate([<br>&nbsp;&nbsp;{ $group: { _id: "$genre", avgPrice: { $avg: "$price" } } },<br>&nbsp;&nbsp;{ $sort: { avgPrice: -1 } }<br>])</code>
+              <button class="copy-btn" title="Copy query" data-copy='db.books.aggregate([ { $group: { _id: "$genre", avgPrice: { $avg: "$price" } } }, { $sort: { avgPrice: -1 } } ])'>📋</button>
+            </div>
+            <div class="step-desc">Calculates mathematical average price per genre with <code>$avg: "$price"</code>.</div>
+          </div>
+
+          <!-- Step B8 -->
+          <div class="step-card" data-step="b8">
+            <div class="step-card-header">
+              <span class="step-tag">Step B8</span>
+              <h4>Combined Aggregation: Match, Group, Sort, Project</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="agg-combined">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.aggregate([<br>&nbsp;&nbsp;{ $match: { year: { $gt: 1900 } } },<br>&nbsp;&nbsp;{ $group: { _id: "$genre", count: { $sum: 1 }, avgPrice: { $avg: "$price" } } },<br>&nbsp;&nbsp;{ $sort: { count: -1 } },<br>&nbsp;&nbsp;{ $project: { genre: "$_id", count: 1, avgPrice: 1, _id: 0 } }<br>])</code>
+              <button class="copy-btn" title="Copy query" data-copy='db.books.aggregate([ { $match: { year: { $gt: 1900 } } }, { $group: { _id: "$genre", count: { $sum: 1 }, avgPrice: { $avg: "$price" } } }, { $sort: { count: -1 } }, { $project: { genre: "$_id", count: 1, avgPrice: 1, _id: 0 } } ])'>📋</button>
+            </div>
+            <div class="step-desc">Full 4-stage pipeline: filters modern books (year > 1900), groups, sorts, and reshapes fields.</div>
+          </div>
+
+          <!-- Additional Examples -->
+          <div class="step-card" data-step="ex1">
+            <div class="step-card-header">
+              <span class="step-tag">Example 1</span>
+              <h4>Aggregation by Genre and Decade</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="ex1-decade">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.aggregate([<br>&nbsp;&nbsp;{ $match: { year: { $gte: 1900 } } },<br>&nbsp;&nbsp;{ $group: { _id: { genre: "$genre", decade: { $subtract: [ "$year", { $mod: [ "$year", 10 ] } ] } }, total: { $sum: 1 } } },<br>&nbsp;&nbsp;{ $sort: { "_id.decade": 1 } }<br>])</code>
+            </div>
+            <div class="step-desc">Uses arithmetic expressions <code>$subtract</code> and <code>$mod</code> to bucket by decade.</div>
+          </div>
+
+          <div class="step-card" data-step="ex2">
+            <div class="step-card-header">
+              <span class="step-tag">Example 2</span>
+              <h4>Find with Sorting and Limiting</h4>
+              <button class="btn btn-sm btn-action btn-run-query" data-query="ex2-sort-limit">Run Step</button>
+            </div>
+            <div class="query-block">
+              <code>db.books.find({ genre: "Dystopian" }).sort({ year: -1 }).limit(2)</code>
+            </div>
+            <div class="step-desc">Combines filter + descending sort + limit(2) in a single cursor chain.</div>
+          </div>
+
+        </div>
+
+        <!-- Right: Execution Inspector & Live Results Console -->
+        <div class="execution-inspector-column">
+          <div class="inspector-sticky-card">
+            <div class="inspector-header">
+              <div class="inspector-title">
+                <span class="console-icon">⚡</span>
+                <h3>Live Execution Inspector</h3>
+              </div>
+              <div class="inspector-badges">
+                <span id="execTimerBadge" class="time-badge">0 ms</span>
+                <span id="execStatusBadge" class="status-badge-ok">Ready</span>
+              </div>
+            </div>
+
+            <div class="active-command-banner">
+              <span class="cmd-label">Active Query:</span>
+              <code id="activeCmdCode">db.books.find().sort({ year: 1 })</code>
+            </div>
+
+            <!-- Output Formats Toggle -->
+            <div class="output-toggle-row">
+              <div class="toggle-group">
+                <button id="btnViewTable" class="toggle-btn active">📊 Table View</button>
+                <button id="btnViewJson" class="toggle-btn">📜 JSON View</button>
+              </div>
+              <button id="btnClearConsole" class="btn btn-ghost btn-xs">Clear</button>
+            </div>
+
+            <!-- Dynamic Result Area -->
+            <div class="results-viewer-box" id="resultsViewerBox">
+              <div class="table-container" id="resultsTableContainer">
+                <p class="empty-state">Click any "Run Step" or "Run All Queries" button to inspect live query results here.</p>
+              </div>
+              <pre class="json-container hidden" id="resultsJsonContainer"><code>// JSON output will appear here</code></pre>
+            </div>
+
+            <!-- Database State Mini-Snapshot -->
+            <div class="mini-snapshot">
+              <div class="snapshot-header">
+                <h4>Live Collection State (<span id="snapDocCount">5</span> Books)</h4>
+                <button id="btnRefreshSnap" class="refresh-link">Refresh</button>
+              </div>
+              <div class="snap-books-list" id="snapBooksList">
+                <!-- Mini cards populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 2: AGGREGATION PIPELINE STUDIO -->
+    <!-- ============================================================ -->
+    <section id="tab-aggregation" class="tab-panel">
+      <div class="studio-header">
+        <div>
+          <h2>Aggregation Pipeline Studio & Visualizer</h2>
+          <p>Inspect multi-stage data transformations: <code>$match</code> &rarr; <code>$group</code> &rarr; <code>$sort</code> &rarr; <code>$project</code></p>
+        </div>
+        <div class="studio-actions">
+          <button id="btnRunStudioPipeline" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Execute Pipeline
+          </button>
+        </div>
+      </div>
+
+      <!-- Pipeline Stages Visual Flow -->
+      <div class="pipeline-flow-container">
+        
+        <!-- Stage 1: $match -->
+        <div class="pipeline-stage-card">
+          <div class="stage-badge">Stage 1: $match</div>
+          <h4>Filter Documents</h4>
+          <p class="stage-purpose">Only documents matching conditions proceed to next stage.</p>
+          <div class="stage-input-group">
+            <label for="matchYearInput">Year Condition:</label>
+            <div class="input-inline">
+              <span class="operator-tag">$gt</span>
+              <input type="number" id="matchYearInput" value="1900" min="1800" max="2025" class="input-field">
+            </div>
+          </div>
+          <div class="stage-meta">
+            <span>Passes: <strong id="matchCount">4 docs</strong></span>
+          </div>
+        </div>
+
+        <div class="pipeline-arrow">&rarr;</div>
+
+        <!-- Stage 2: $group -->
+        <div class="pipeline-stage-card">
+          <div class="stage-badge">Stage 2: $group</div>
+          <h4>Group & Aggregate</h4>
+          <p class="stage-purpose">Groups documents by <code>$genre</code> and computes accumulators.</p>
+          <div class="stage-spec">
+            <code>_id: "$genre"</code><br>
+            <code>count: { $sum: 1 }</code><br>
+            <code>avgPrice: { $avg: "$price" }</code>
+          </div>
+          <div class="stage-meta">
+            <span>Groups: <strong id="groupCount">3 groups</strong></span>
+          </div>
+        </div>
+
+        <div class="pipeline-arrow">&rarr;</div>
+
+        <!-- Stage 3: $sort -->
+        <div class="pipeline-stage-card">
+          <div class="stage-badge">Stage 3: $sort</div>
+          <h4>Order Results</h4>
+          <p class="stage-purpose">Orders groups by count descending (-1).</p>
+          <div class="stage-spec">
+            <code>count: -1 (descending)</code>
+          </div>
+          <div class="stage-meta">
+            <span>Sort Field: <strong>count</strong></span>
+          </div>
+        </div>
+
+        <div class="pipeline-arrow">&rarr;</div>
+
+        <!-- Stage 4: $project -->
+        <div class="pipeline-stage-card">
+          <div class="stage-badge">Stage 4: $project</div>
+          <h4>Shape Output Document</h4>
+          <p class="stage-purpose">Renames <code>$_id</code> to <code>genre</code> and suppresses <code>_id</code>.</p>
+          <div class="stage-spec">
+            <code>genre: "$_id", _id: 0</code><br>
+            <code>count: 1, avgPrice: 1</code>
+          </div>
+          <div class="stage-meta">
+            <span>Final Schema: <strong>3 fields</strong></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Pipeline Output & Visualization -->
+      <div class="aggregation-dashboard-grid mt-6">
+        <!-- Visual Stats / Chart -->
+        <div class="agg-card">
+          <h3>Visual Distribution by Genre</h3>
+          <p class="sub-label">Aggregated Counts and Average Prices</p>
+          <div class="agg-bars-chart" id="aggBarsChart">
+            <!-- Dynamically populated bars -->
+          </div>
+        </div>
+
+        <!-- Pipeline JSON Result -->
+        <div class="agg-card">
+          <div class="agg-card-header">
+            <h3>Pipeline Output Stream</h3>
+            <button class="btn btn-ghost btn-xs" id="btnCopyPipelineJson">Copy JSON</button>
+          </div>
+          <div class="agg-table-wrap" id="studioOutputTable">
+            <!-- Output table -->
+          </div>
+          <pre class="studio-json-code" id="studioOutputJson"><code>// Executing pipeline...</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 3: DATABASE EXPLORER & INDEXES -->
+    <!-- ============================================================ -->
+    <section id="tab-explorer" class="tab-panel">
+      <div class="explorer-grid">
+        
+        <!-- Document Management Section -->
+        <div class="explorer-col-main">
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h2>Collection Documents: <code>library.books</code></h2>
+                <p>Live document records in the MongoDB database</p>
+              </div>
+              <button id="btnOpenAddModal" class="btn btn-primary btn-sm">+ Add New Book</button>
+            </div>
+
+            <!-- Documents Grid -->
+            <div class="books-card-grid" id="booksCardGrid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Indexes & System Stats Sidebar -->
+        <div class="explorer-col-side">
+          <!-- Index Inspector -->
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <h3>Active MongoDB Indexes</h3>
+                <p>Inspected via <code>db.books.getIndexes()</code></p>
+              </div>
+              <button id="btnCreateIndexAction" class="btn btn-secondary btn-xs">+ Add author_1 Index</button>
+            </div>
+            <div class="indexes-list" id="indexesListContainer">
+              <!-- Populated by JS -->
+            </div>
+            <div class="index-educational-note">
+              <strong>Why Indexes Matter:</strong> Without an index on <code>author</code>, MongoDB performs a full collection scan (<code>COLLSCAN</code>). With <code>author_1</code>, it performs an efficient index scan (<code>IXSCAN</code>), reducing query time from O(N) to O(log N).
+            </div>
+          </div>
+
+          <!-- Database Storage Details -->
+          <div class="card-box mt-4">
+            <h3>Cluster Databases Overview</h3>
+            <div class="databases-table-wrap" id="databasesTableWrap">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 4: INTERACTIVE MONGOSH TERMINAL -->
+    <!-- ============================================================ -->
+    <section id="tab-terminal" class="tab-panel">
+      <div class="terminal-wrapper">
+        <div class="terminal-topbar">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">mongosh — Connected to mongodb://127.0.0.1:27017/library</div>
+          <div class="terminal-quick-actions">
+            <button id="btnClearTerminal" class="btn btn-ghost btn-xs">Clear Screen</button>
+          </div>
+        </div>
+
+        <!-- Quick Snippet Chips -->
+        <div class="snippet-chips-bar">
+          <span class="chips-label">Quick Snippets:</span>
+          <button class="chip" data-cmd="db.books.find().sort({ year: 1 })">Sort Year (Asc)</button>
+          <button class="chip" data-cmd="db.books.find().limit(3)">Limit 3</button>
+          <button class="chip" data-cmd='db.books.find({ genre: "Dystopian" })'>Genre: Dystopian</button>
+          <button class="chip" data-cmd="db.books.createIndex({ author: 1 })">Create Index author</button>
+          <button class="chip" data-cmd="db.books.getIndexes()">getIndexes()</button>
+          <button class="chip" data-cmd='db.books.aggregate([ { $group: { _id: "$genre", count: { $sum: 1 } } }, { $sort: { count: -1 } } ])'>Group by Genre Count</button>
+          <button class="chip" data-cmd='db.books.aggregate([ { $group: { _id: "$genre", avgPrice: { $avg: "$price" } } }, { $sort: { avgPrice: -1 } } ])'>Avg Price Per Genre</button>
+          <button class="chip" data-cmd="show collections">show collections</button>
+          <button class="chip" data-cmd="show dbs">show dbs</button>
+        </div>
+
+        <!-- Terminal Output Screen -->
+        <div class="terminal-screen" id="terminalScreen">
+          <div class="term-line banner">Welcome to the MongoDB Shell (mongosh v2.13.0)</div>
+          <div class="term-line banner">Connected to: mongodb://127.0.0.1:27017/library (MongoDB 8.2.1)</div>
+          <div class="term-line banner">Type a JavaScript / mongosh query below and press Enter, or click any quick snippet chip.</div>
+          <div class="term-line spacer"></div>
+        </div>
+
+        <!-- Terminal Input Line -->
+        <div class="terminal-prompt-row">
+          <span class="prompt-symbol">library&gt;</span>
+          <input type="text" id="terminalInput" class="terminal-input" placeholder="db.books.find().sort({ year: 1 })" autocomplete="off" spellcheck="false">
+          <button id="btnExecutePrompt" class="btn btn-primary btn-sm">Send ↵</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 5: LAB REPORT & VIVA VOCE -->
+    <!-- ============================================================ -->
+    <section id="tab-report" class="tab-panel">
+      <div class="report-container">
+        
+        <div class="report-header">
+          <div class="report-badge">ACADEMIC LABORATORY RECORD</div>
+          <h2>MongoDB Database & Collections Management, Record Operations, Indexing, and Aggregation</h2>
+          <div class="report-meta">
+            <span><strong>Target DB:</strong> library</span>
+            <span><strong>Target Collection:</strong> books</span>
+            <span><strong>Server Engine:</strong> MongoDB v8.2.1 Community Server</span>
+            <span><strong>Client Shell:</strong> mongosh v2.13.0</span>
+          </div>
+        </div>
+
+        <div class="report-body">
+          
+          <div class="report-section">
+            <h3>1. AIM</h3>
+            <p>The aim of this experiment is to:</p>
+            <ul>
+              <li><strong>Part (a):</strong> Write MongoDB queries to create and drop databases and collections.</li>
+              <li><strong>Part (b):</strong> Write MongoDB queries to work with records using <code>find()</code>, <code>limit()</code>, <code>sort()</code>, <code>createIndex()</code>, and <code>aggregate()</code>.</li>
+            </ul>
+          </div>
+
+          <div class="report-section">
+            <h3>2. PROBLEM STATEMENT</h3>
+            <p><strong>Part (a) – Databases and Collections:</strong><br>
+            Create a database named <code>library</code> and a collection called <code>books</code>. Perform the following operations:
+            create database and collection, insert sample documents, view all collections in the database, drop the collection, and drop the database.</p>
+            <p><strong>Part (b) – Records Operations:</strong><br>
+            Using the <code>books</code> collection with sample data (<code>title</code>, <code>author</code>, <code>year</code>, <code>genre</code>, <code>price</code>), perform:
+            sort by year ascending, retrieve first 3 books using <code>limit(3)</code>, filter by genre, create and verify index on <code>author</code>, and compute aggregation pipelines (group by genre with document count, average price per genre, and combined match-group-sort-project pipeline).</p>
+          </div>
+
+          <div class="report-section">
+            <h3>3. ALGORITHM & STEP-BY-STEP PROCEDURE</h3>
+            <div class="algo-box">
+              <h4>Part (a) – Databases and Collections</h4>
+              <ol>
+                <li><strong>List databases:</strong> Execute <code>show dbs</code> to inspect storage and existing namespaces.</li>
+                <li><strong>Switch / Create database:</strong> Execute <code>use library</code>. MongoDB provisions databases lazily upon writing the first document.</li>
+                <li><strong>Create collection explicitly:</strong> Execute <code>db.createCollection("books")</code>.</li>
+                <li><strong>Insert documents:</strong> Execute <code>db.books.insertMany([ ... ])</code> to populate initial records.</li>
+                <li><strong>View collections:</strong> Execute <code>show collections</code> to verify existence.</li>
+                <li><strong>Drop collection:</strong> Execute <code>db.books.drop()</code> to remove the collection namespace.</li>
+                <li><strong>Drop database:</strong> Execute <code>db.dropDatabase()</code> to delete the database files.</li>
+              </ol>
+
+              <h4 class="mt-4">Part (b) – Records Operations</h4>
+              <ol>
+                <li><strong>Re-seed:</strong> Re-create database <code>library</code> and insert the 5 standard book documents.</li>
+                <li><strong>Sort:</strong> Execute <code>db.books.find().sort({ year: 1 })</code> to order records by publication year ascending.</li>
+                <li><strong>Limit:</strong> Execute <code>db.books.find().limit(3)</code> to restrict cursor results to the first 3 entries.</li>
+                <li><strong>Filter:</strong> Execute <code>db.books.find({ genre: "Dystopian" })</code> for targeted attribute querying.</li>
+                <li><strong>Index:</strong> Execute <code>db.books.createIndex({ author: 1 })</code> and verify via <code>db.books.getIndexes()</code>.</li>
+                <li><strong>Aggregation (Count):</strong> Execute <code>db.books.aggregate([ { $group: { _id: "$genre", count: { $sum: 1 } } }, { $sort: { count: -1 } } ])</code>.</li>
+                <li><strong>Aggregation (Average):</strong> Execute <code>db.books.aggregate([ { $group: { _id: "$genre", avgPrice: { $avg: "$price" } } }, { $sort: { avgPrice: -1 } } ])</code>.</li>
+                <li><strong>Combined Pipeline:</strong> Execute multi-stage pipeline with <code>$match</code> (year &gt; 1900), <code>$group</code>, <code>$sort</code>, and <code>$project</code>.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <h3>4. SAMPLE DATASET SPECIFICATION</h3>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Year</th>
+                  <th>Genre</th>
+                  <th>Price ($)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1984</td><td>George Orwell</td><td>1949</td><td><span class="badge genre-dystopian">Dystopian</span></td><td>$12.99</td></tr>
+                <tr><td>To Kill a Mockingbird</td><td>Harper Lee</td><td>1960</td><td><span class="badge genre-fiction">Fiction</span></td><td>$14.99</td></tr>
+                <tr><td>The Great Gatsby</td><td>F. Scott Fitzgerald</td><td>1925</td><td><span class="badge genre-classic">Classic</span></td><td>$10.99</td></tr>
+                <tr><td>Moby Dick</td><td>Herman Melville</td><td>1851</td><td><span class="badge genre-adventure">Adventure</span></td><td>$9.99</td></tr>
+                <tr><td>Brave New World</td><td>Aldous Huxley</td><td>1932</td><td><span class="badge genre-dystopian">Dystopian</span></td><td>$11.99</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="report-section">
+            <h3>5. VIVA VOCE QUESTIONS & COMPREHENSIVE ANSWERS</h3>
+            <div class="qa-card">
+              <div class="qa-q">Q1: How does MongoDB lazily create databases and collections?</div>
+              <div class="qa-a"><strong>Answer:</strong> When you issue <code>use library</code>, MongoDB switches the shell context but does not immediately write to disk or create files until you insert the first document or invoke <code>db.createCollection()</code>. Similarly, inserting documents into an uncreated collection automatically provisions it.</div>
+            </div>
+
+            <div class="qa-card">
+              <div class="qa-q">Q2: What is the underlying data structure of a MongoDB index, and why is it used?</div>
+              <div class="qa-a"><strong>Answer:</strong> MongoDB uses <strong>B-Tree (B+ Tree)</strong> data structures for its indexes. This allows search, sequential access, insertions, and deletions in logarithmic time (<code>O(log N)</code>). Without an index, MongoDB must perform a <code>COLLSCAN</code> (collection scan), examining every document.</div>
+            </div>
+
+            <div class="qa-card">
+              <div class="qa-q">Q3: How does the Aggregation Pipeline differ from Map-Reduce in MongoDB?</div>
+              <div class="qa-a"><strong>Answer:</strong> The aggregation framework processes documents through native C++ pipeline stages (such as <code>$match</code>, <code>$group</code>, <code>$sort</code>, <code>$project</code>). It executes much faster than JavaScript-based Map-Reduce and offers declarative syntax, native memory limits (100MB per stage unless <code>allowDiskUse: true</code> is passed), and rich operators.</div>
+            </div>
+
+            <div class="qa-card">
+              <div class="qa-q">Q4: Why does pipeline stage order matter in aggregate()?</div>
+              <div class="qa-a"><strong>Answer:</strong> Order matters because each stage takes the output of the preceding stage as its input. For example, placing <code>$match</code> before <code>$group</code> significantly reduces the number of documents passed to grouping, drastically cutting memory and CPU usage.</div>
+            </div>
+
+            <div class="qa-card">
+              <div class="qa-q">Q5: What is the purpose of the $project stage in MongoDB aggregation?</div>
+              <div class="qa-a"><strong>Answer:</strong> The <code>$project</code> stage reshapes documents: it includes specific fields (<code>field: 1</code>), suppresses fields (e.g. <code>_id: 0</code>), renames keys (e.g. <code>genre: "$_id"</code>), and computes derived values before returning results to the client.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Book Modal -->
+  <div class="modal-overlay hidden" id="addBookModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add New Book Record</h3>
+        <button id="btnCloseModal" class="modal-close">&times;</button>
+      </div>
+      <form id="addBookForm">
+        <div class="form-group">
+          <label for="bookTitle">Book Title *</label>
+          <input type="text" id="bookTitle" required placeholder="e.g. Fahrenheit 451" class="input-field">
+        </div>
+        <div class="form-group">
+          <label for="bookAuthor">Author *</label>
+          <input type="text" id="bookAuthor" required placeholder="e.g. Ray Bradbury" class="input-field">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bookYear">Publication Year</label>
+            <input type="number" id="bookYear" required value="1953" class="input-field">
+          </div>
+          <div class="form-group">
+            <label for="bookPrice">Price ($)</label>
+            <input type="number" step="0.01" id="bookPrice" required value="11.50" class="input-field">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bookGenre">Genre</label>
+          <select id="bookGenre" class="input-field">
+            <option value="Dystopian">Dystopian</option>
+            <option value="Fiction">Fiction</option>
+            <option value="Classic">Classic</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Science Fiction">Science Fiction</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btnCancelModal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Insert Document</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
